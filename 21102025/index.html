@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Gato</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            background-color: #333;
+            border: 5px solid #333;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            font-size: 3.5rem; 
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .cell:hover {
+            background-color: #eee;
+        }
+        
+        .cell.x {
+            color: #007bff;
+        }
+        .cell.o {
+            color: #dc3545; 
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            height: 30px; 
+        }
+
+        #restartButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745; 
+            color: white;
+            cursor: pointer;
+        }
+
+        #restartButton:hover {
+            background-color: #218838;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Juego de Gato </h1>
+    
+    <div id="status">Turno del jugador X</div>
+    
+    <div id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+    
+    <button id="restartButton">Reiniciar Juego</button>
+
+    <script>
+        const statusDisplay = document.getElementById('status');
+        const board = document.getElementById('board');
+        const restartButton = document.getElementById('restartButton');
+        const cells = document.querySelectorAll('.cell');
+
+        let gameActive = true; 
+        let currentPlayer = 'X'; 
+        
+        let boardState = ["", "", "", "", "", "", "", "", ""];
+
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5], 
+            [6, 7, 8], 
+            [0, 3, 6],
+            [1, 4, 7], 
+            [2, 5, 8], 
+            [0, 4, 8], 
+            [2, 4, 6]  
+        ];
+
+        
+        function handleCellClick(event) {
+            const clickedCell = event.target; 
+            const cellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+            if (boardState[cellIndex] !== "" || !gameActive) {
+                return;
+            }
+
+            boardState[cellIndex] = currentPlayer;
+            
+            clickedCell.textContent = currentPlayer;
+            
+            clickedCell.classList.add(currentPlayer.toLowerCase());
+
+            checkResultValidation();
+        }
+
+        
+        function checkResultValidation() {
+            let roundWon = false; 
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i]; 
+                
+                const cellA = boardState[a];
+                const cellB = boardState[b];
+                const cellC = boardState[c];
+
+                if (cellA === '' || cellB === '' || cellC === '') {
+                    continue; 
+                }
+                
+                if (cellA === cellB && cellB === cellC) {
+                    roundWon = true;
+                    break; 
+                }
+            }
+
+            if (roundWon) {
+                statusDisplay.textContent = `El jugador ${currentPlayer} ha ganado `;
+                gameActive = false; 
+                return;
+            }
+
+            if (!boardState.includes("")) {
+                statusDisplay.textContent = "Empate ";
+                gameActive = false;
+                return;
+            }
+
+            changePlayer();
+        }
+
+        function changePlayer() {
+            
+            currentPlayer = (currentPlayer === 'X') ? 'O' : 'X';
+            statusDisplay.textContent = `Turno del jugador ${currentPlayer}`;
+        }
+
+        
+        function handleRestartGame() {
+            gameActive = true;
+            currentPlayer = 'X';
+            boardState = ["", "", "", "", "", "", "", "", ""]; 
+            statusDisplay.textContent = `Turno del jugador ${currentPlayer}`;
+            
+            cells.forEach(cell => {
+                cell.textContent = "";
+                cell.classList.remove('x', 'o'); 
+            });
+        }
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+        
+        restartButton.addEventListener('click', handleRestartGame);
+
+    </script>
+</body>
+</html>
